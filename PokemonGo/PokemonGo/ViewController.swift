@@ -14,14 +14,31 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
     var ubicacion = CLLocationManager()
     var contActualizaciones:Int = 0
+    var pokemons:[Pokemon] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        pokemons = obtenerPokemons()
         
         ubicacion.delegate = self
         if CLLocationManager.authorizationStatus() == .authorizedWhenInUse{
             mapView.showsUserLocation = true
             ubicacion.startUpdatingLocation()
+            
+            Timer.scheduledTimer(withTimeInterval: 5, repeats: true, block: {
+                (timer) in
+                if let coord = self.ubicacion.location?.coordinate{
+                    let pin  = MKPointAnnotation()
+                    pin.coordinate = coord
+                    let randomLat = (Double(arc4random_uniform(200))-100.0)/5000.0
+                    let randomLon = (Double(arc4random_uniform(200))-100.0)/5000.0
+                    pin.coordinate.latitude += randomLat
+                    pin.coordinate.longitude += randomLon
+                    self.mapView.addAnnotation(pin)
+                }
+            })
+            
         }else{
             ubicacion.requestWhenInUseAuthorization()
         }
